@@ -1,4 +1,6 @@
 # EventBus Service
+[![](https://jitpack.io/v/wowselim/eventbus-service.svg)](https://jitpack.io/#wowselim/eventbus-service)
+[![](https://github.com/wowselim/eventbus-service/workflows/Gradle%20Build/badge.svg)](https://github.com/wowselim/eventbus-service)
 
 EbService generates kotlin code that enables
 a type-safe way of using the Vert.x EventBus.
@@ -15,37 +17,42 @@ making use of a special
 Imagine we have a service that can divide a
 double by another double.
 
-We might model the input and output data for this
-service as follows:
+We might model this service as follows:
 ```kotlin
-data class DivisionRequest(val dividend: Double, val divisor: Double)
+interface DivisionService {
+  suspend fun divide(dividend: Double, divisor: Double): Division
 
-sealed class Division {
-  data class Success(val quotient: Double) : Division()
-  data class Error(val message: String) : Division()
+  sealed class Division {
+    data class Success(val quotient: Double) : Division()
+    data class Error(val message: String) : Division()
+  }
 }
 ```
 
-Annotate the service verticle as follows:
+Next, we need to annotate this interface as follows:
 ```kotlin
-@EventBusService(
-    topic = "co.selim.sample.division",
-    consumes = DivisionRequest::class,
-    produces = Division::class,
-    propertyName = "divisionRequests",
-    functionName = "divide"
-)
+@EventBusService
+interface DivisionService
 ```
 
 This will generate two things
-* An extension property to get the division
-requests:
-```kotlin
-val Verticle.divisionRequests: Flow<EventBusServiceRequest<DivisionRequest, Division>>
-```
-* An extension function to request divisions:
-```kotlin
-suspend fun Verticle.divide(request: DivisionRequest): Division
-````
+* An implementation of this service (`DivisionServiceImpl`).
+  This implementation forwards the parameters to subscribers
+  of the generated properties.
+* An extension property to get the division requests:
+  ```kotlin
+  val Vertx.divideRequests: Flow<EventBusServiceRequest<DivisionRequest, Division>>
+  ```
+  Where `DivisionRequest` is a data class that wraps the two parameters.
 
 This service is fully implemented in the `example` module.
+
+## Adding it to your project
+Add the [JitPack repository](https://jitpack.io/#wowselim/eventbus-service) to your build script and include the following dependencies:
+
+```groovy
+implementation 'com.github.wowselim.eventbus-service:eventbus-service-core:<latestVersion>'
+kapt 'com.github.wowselim.eventbus-service:eventbus-service-codegen:<latestVersion>'
+```
+
+The latest version can be found in the [releases section](https://github.com/wowselim/eventbus-service/releases).
