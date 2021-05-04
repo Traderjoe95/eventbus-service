@@ -1,0 +1,7 @@
+stages:
+  - publish
+
+nexus-deploy:
+  stage: publish
+  image: gradle:6.8-jdk15
+  script: gradle -PsnapshotRepo="$NEXUS_SNAPSHOTS" -PreleaseRepo="$NEXUS_RELEASES" -PdeployUser="$NEXUS_DEPLOY_USER" -PdeployPassword="$NEXUS_DEPLOY_PASSWORD" publish
