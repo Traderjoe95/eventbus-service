@@ -32,6 +32,11 @@ import javax.tools.Diagnostic
 @SupportedOptions("kapt.kotlin.generated")
 @SupportedAnnotationTypes("com.kobil.vertx.ebservice.annotation.EventBusService")
 class ServiceProcessor : AbstractProcessor() {
+  private val primitives: Set<String> = setOf(
+    "kotlin.Boolean", "kotlin.Byte", "kotlin.Char",
+    "kotlin.Double", "kotlin.Float", "kotlin.Int", "kotlin.Long", "kotlin.Short"
+  )
+
   override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
     val elements = roundEnv.getElementsAnnotatedWith(EventBusService::class.java)
     if (elements.isEmpty()) return false
@@ -69,27 +74,21 @@ class ServiceProcessor : AbstractProcessor() {
       .addFunction(binderAccessor())
       .build().writeTo(processingEnv.filer)
 
-//    services.forEach { service ->
-//      val fileSpecBuilder = generateFile(service.name)
-//      fileSpecBuilder.addType(
-//        generateServiceImpl(service)
-//          .apply { generateFunctions(fileSpecBuilder, this, service.functions) }
-//          .build()
-//      )
-//      generateRequestProperties(service.name, service.functions).forEach(fileSpecBuilder::addProperty)
-//      fileSpecBuilder.build()
-//        .writeTo(processingEnv.filer)
-//    }
-
     return true
   }
 
-  private fun Sequence<ImmutableKmFunction>.extractFunctions(): Sequence<Function> {
+  private fun Sequence<ImmutableKmFunction>.extractFunctions(): Sequence<ServiceFun> {
+    val overload: MutableMap<String, Int> = mutableMapOf<String, Int>().withDefault { 0 }
+
     return map { kmFunction ->
-      if (!kmFunction.isSuspend) {
+      val returnTypeStr = kmFunction.returnType.classifier.toClassName(false).toString()
+      if (!kmFunction.isSuspend && returnTypeStr != "kotlin.Unit") {
         logError("Function ${kmFunction.name} must be suspending")
         error("Function ${kmFunction.name} must be suspending")
       }
+
+      val overloadId = overload.getValue(kmFunction.name)
+      overload[kmFunction.name] = overloadId + 1
 
       val typeParameters = kmFunction.returnType.getTypeParameters()
       val returnType = kmFunction.returnType.classifier
@@ -98,12 +97,6 @@ class ServiceProcessor : AbstractProcessor() {
 
       val parameters = kmFunction.valueParameters
         .asSequence()
-        .onEach { parameter ->
-          if (parameter.varargElementType != null) {
-            logError("Vararg parameters are not supported by ebservice")
-            error("Vararg parameters are not supported by ebservice")
-          }
-        }
         .filter { parameter ->
           val classifier = parameter.type!!.classifier
           classifier is KmClassifier.Class || classifier is KmClassifier.TypeAlias
@@ -111,18 +104,34 @@ class ServiceProcessor : AbstractProcessor() {
         .toFunctionParameters()
         .toSet()
 
-      Function(kmFunction.name, returnType, parameters)
+      ServiceFun(
+        kmFunction.name, returnType, parameters, overloadId,
+        isSuspend = kmFunction.isSuspend
+      )
     }
   }
 
   private fun Sequence<ImmutableKmValueParameter>.toFunctionParameters(): Sequence<Parameter> {
     return map { kmValueParameter ->
-      val type = kmValueParameter.type!!
+      val type = if (kmValueParameter.varargElementType != null) {
+        kmValueParameter.varargElementType!!
+      } else {
+        kmValueParameter.type!!
+      }
+
       val classifier = type.classifier
+
+      val isPrimitive =
+        !type.isNullable && primitives.contains(classifier.toClassName(false).toString())
+
       val typeParametersOfParameter = type.getTypeParameters()
       val typeOfParameter =
         classifier.toClassName(type.isNullable).safelyParameterizedBy(typeParametersOfParameter)
-      Parameter(kmValueParameter.name, typeOfParameter)
+      Parameter(
+        kmValueParameter.name, typeOfParameter,
+        kmValueParameter.varargElementType != null,
+        isPrimitive
+      )
     }
   }
 

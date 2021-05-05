@@ -11,32 +11,50 @@ import kotlinx.coroutines.launch
 
 @EventBusService
 interface MathService {
-  suspend fun add(addendA: Double, addendB: Double): Double
+  suspend fun add(addendA: Double, addendB: Double, vararg test: Double): Double
   suspend fun divide(dividend: Double, divisor: Double): Double
+
+  suspend fun joinVararg(vararg test: String): String
+  suspend fun sumVararg(vararg test: Double): String
+
+  suspend fun suspendEvent(payload: String)
+  fun event(payload: String)
 }
 
 @EventBusService
 interface MultiplicationService {
   suspend fun multiply(factorA: Double, factorB: Double): Double
+  suspend fun multiply(factorA: Int, factorB: Int, vararg test: String): Int
 }
 
 class DivisionVerticle : CoroutineVerticle() {
   override suspend fun start() {
     vertx.serviceBinder<MathService>().bind(
       object : MathService {
-        override suspend fun add(addendA: Double, addendB: Double): Double = addendA + addendB
+        override suspend fun add(addendA: Double, addendB: Double, vararg test: Double): Double =
+          addendA + addendB + test.sum()
 
         override suspend fun divide(dividend: Double, divisor: Double): Double =
           when (divisor) {
             0.0 -> throw ArithmeticException("Division by zero")
             else -> dividend / divisor
           }
+
+        override suspend fun joinVararg(vararg test: String): String = test.joinToString(", ")
+
+        override suspend fun sumVararg(vararg test: Double): String = test.sum().toString()
+
+        override suspend fun suspendEvent(payload: String) = println("received event: $payload")
+
+        override fun event(payload: String) = println("received event: $payload")
       }
     )
 
     val bound = vertx.serviceBinder<MultiplicationService>().bind(
       object: MultiplicationService {
         override suspend fun multiply(factorA: Double, factorB: Double): Double = factorA * factorB
+        override suspend fun multiply(factorA: Int, factorB: Int, vararg test: String): Int =
+          factorA * factorB
       }
     )
 
@@ -55,8 +73,9 @@ class SampleVerticle : CoroutineVerticle() {
     val multiplicationService = vertx.service<MultiplicationService>()
     println("after getting services")
 
+    val arr = doubleArrayOf(1.0, 2.0, 3.0)
     try {
-      val sum = mathService.add(3.3, 4.5)
+      val sum = mathService.add(3.3, 4.5, *arr)
       println(sum)
     } catch (e: Exception) {
       println("OH NOES, $e")
@@ -82,6 +101,23 @@ class SampleVerticle : CoroutineVerticle() {
     } catch (e: Exception) {
       println("OH NOES, $e")
     }
+
+    try {
+      val joined = mathService.joinVararg("a", "b", "c")
+      println(joined)
+    } catch (e: Exception) {
+      println("OH NOES, $e")
+    }
+
+    try {
+      val sum = mathService.sumVararg(1.0, 2.0, 3.0)
+      println(sum)
+    } catch (e: Exception) {
+      println("OH NOES, $e")
+    }
+
+    mathService.event("some payload")
+    mathService.suspendEvent("sent with suspend")
 
     println("Waiting for 10 seconds")
     delay(10000)
