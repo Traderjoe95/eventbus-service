@@ -105,7 +105,7 @@ class ServiceProcessor : AbstractProcessor() {
         .toSet()
 
       ServiceFun(
-        kmFunction.name, returnType, parameters, overloadId,
+        kmFunction.name, returnType, parameters, overloadId.toUInt(),
         isSuspend = kmFunction.isSuspend
       )
     }

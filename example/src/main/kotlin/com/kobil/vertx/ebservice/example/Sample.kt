@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 @EventBusService
 interface MathService {
   suspend fun add(addendA: Double, addendB: Double, vararg test: Double): Double
-  suspend fun divide(dividend: Double, divisor: Double): Double
+  suspend fun Divide(dividend: Double, divisor: Double): Double
 
   suspend fun joinVararg(vararg test: String): String
   suspend fun sumVararg(vararg test: Double): String
@@ -34,7 +34,7 @@ class DivisionVerticle : CoroutineVerticle() {
         override suspend fun add(addendA: Double, addendB: Double, vararg test: Double): Double =
           addendA + addendB + test.sum()
 
-        override suspend fun divide(dividend: Double, divisor: Double): Double =
+        override suspend fun Divide(dividend: Double, divisor: Double): Double =
           when (divisor) {
             0.0 -> throw ArithmeticException("Division by zero")
             else -> dividend / divisor
@@ -82,14 +82,14 @@ class SampleVerticle : CoroutineVerticle() {
     }
 
     try {
-      val quotient = mathService.divide(3.3, 4.5)
+      val quotient = mathService.Divide(3.3, 4.5)
       println(quotient)
     } catch (e: Exception) {
       println("OH NOES, $e")
     }
 
     try {
-      val quotient = mathService.divide(3.3, 0.0)
+      val quotient = mathService.Divide(3.3, 0.0)
       println(quotient)
     } catch (e: Exception) {
       println("Caught $e")
@@ -131,14 +131,14 @@ class SampleVerticle : CoroutineVerticle() {
     }
 
     try {
-      val quotient = mathService.divide(3.3, 4.5)
+      val quotient = mathService.Divide(3.3, 4.5)
       println(quotient)
     } catch (e: Exception) {
       println("OH NOES, $e")
     }
 
     try {
-      val quotient = mathService.divide(3.3, 0.0)
+      val quotient = mathService.Divide(3.3, 0.0)
       println(quotient)
     } catch (e: Exception) {
       println("Caught $e")

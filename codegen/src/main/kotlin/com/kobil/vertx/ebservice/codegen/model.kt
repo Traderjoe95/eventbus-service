@@ -2,19 +2,20 @@ package com.kobil.vertx.ebservice.codegen
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeName
+import java.util.Locale
 
 data class Service(val name: ClassName, val functions: Set<ServiceFun>)
 
 data class ServiceFun(
   val name: String, val returnType: TypeName, val parameters: Set<Parameter>,
-  val overloadId: Int = 0, val isSuspend: Boolean = true
+  val overloadId: UInt = 0.toUInt(), val isSuspend: Boolean = true
 ) {
   val fullName: String
-    get() = if (overloadId == 0) name else "${name}_$overloadId"
+    get() = if (overloadId == 0.toUInt()) name else "${name}_$overloadId"
 
   val parameterContainer: String
-    get() = if (overloadId == 0) "${name.capitalize()}Parameters"
-    else "${name.capitalize()}Parameters${overloadId}"
+    get() = if (overloadId == 0.toUInt()) "${name.replaceFirstChar { it.titlecase(Locale.getDefault()) }}Parameters"
+    else "${name.replaceFirstChar { it.titlecase(Locale.getDefault()) }}Parameters${overloadId}"
 
   val isEventStyle: Boolean = returnType.toString() == "kotlin.Unit"
 }

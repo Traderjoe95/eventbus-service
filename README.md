@@ -163,6 +163,6 @@ plugins {
 Then, add the following dependencies:
 
 ```kotlin
-implementation("com.kobil.vertx:ebservice:1.0.0")
-kapt("com.kobil.vertx:ebservice-codegen:1.0.0")
+implementation("com.kobil.vertx:ebservice:1.0.1")
+kapt("com.kobil.vertx:ebservice-codegen:1.0.1")
 ```

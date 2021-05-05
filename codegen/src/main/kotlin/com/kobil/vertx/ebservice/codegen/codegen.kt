@@ -1,3 +1,5 @@
+@file:JvmName("CodeGenerator")
+
 package com.kobil.vertx.ebservice.codegen
 
 import com.kobil.vertx.ebservice.BoundService
@@ -20,7 +22,7 @@ import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
-import kotlinx.coroutines.CoroutineScope
+import java.util.Locale
 import kotlin.reflect.KClass
 
 internal const val PKG = "com.kobil.vertx.ebservice"
@@ -107,7 +109,10 @@ internal fun generateStubs(services: List<Service>): TypeSpec {
         PropertySpec.builder(
           "DEFAULT_ADDRESS", String::class, KModifier.CONST
         )
-          .initializer("%S", "${service.name.packageName}.${service.name.simpleName.toLowerCase()}")
+          .initializer(
+            "%S",
+            "${service.name.packageName}.${service.name.simpleName.lowercase(Locale.getDefault())}"
+          )
           .build()
       )
 
@@ -257,7 +262,6 @@ private fun generateParameterContainer(
       FunSpec.constructorBuilder()
         .addParameters(
           function.parameters.map { parameter ->
-            println("${parameter.name} ${parameter.type} ${parameter.isVararg}, ${parameter.isPrimitive}")
             if (parameter.isVararg) ParameterSpec(
               parameter.name,
               arrayType(parameter.type, parameter.isPrimitive)
@@ -376,7 +380,7 @@ private fun generateBindFun(service: Service): FunSpec {
       ClassName("io.vertx.core.eventbus", "MessageConsumer")
     ).addStatement(
       "val scope: %T = %M(vertx.%M())",
-      CoroutineScope::class,
+      ClassName(KOTLINX_COROUTINES, "CoroutineScope"),
       MemberName(KOTLINX_COROUTINES, "CoroutineScope"),
       MemberName(VERTX_COROUTINES, "dispatcher")
     )

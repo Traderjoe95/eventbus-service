@@ -11,7 +11,6 @@ repositories {
 
 dependencies {
   implementation(kotlin("stdlib-jdk8"))
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-RC")
 
   implementation("io.vertx:vertx-core:4.0.3")
   implementation("com.squareup:kotlinpoet:1.8.0")
