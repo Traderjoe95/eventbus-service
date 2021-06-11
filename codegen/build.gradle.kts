@@ -19,10 +19,10 @@ dependencies {
 }
 
 val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "15"
+compileKotlin.kotlinOptions.jvmTarget = "16"
 
 val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.kotlinOptions.jvmTarget = "15"
+compileTestKotlin.kotlinOptions.jvmTarget = "16"
 
 publishing {
   publications {

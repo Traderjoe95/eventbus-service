@@ -1,11 +1,11 @@
 plugins {
   kotlin("jvm") version "1.5.0" apply false
-  kotlin("kapt") version "1.4.32" apply false
+  kotlin("kapt") version "1.5.0" apply false
   `maven-publish`
 }
 
 group = "com.kobil.vertx"
-version = "1.1.0-SNAPSHOT"
+version = "1.0.2"
 
 val projectGroup = group
 val projectVersion = version
@@ -26,6 +26,7 @@ subprojects {
       maven {
         name = "nexus"
         url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotRepo else releaseRepo)
+        isAllowInsecureProtocol = true
 
         credentials {
           username = deployUser
