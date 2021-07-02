@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
   implementation(kotlin("stdlib-jdk8"))
-  implementation("io.vertx:vertx-core:4.0.3")
+  implementation("io.vertx:vertx-core:4.1.1")
   api(project(":annotation"))
 }
 

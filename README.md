@@ -6,6 +6,8 @@ The generated code eliminates the need of guessing
 which types are required by EventBus consumers and
 which types are produced by them.
 
+[[_TOC_]]
+
 ## Getting started
 Imagine we have a service that can divide a
 double by another double.
@@ -138,6 +140,14 @@ val divisionService = vertx.service<DivisionService>("my.custom.address")
 val divisionBinder = vertx.serviceBinder<DivisionService>("my.custom.address")
 ```
 
+### Known Pitfalls
+
+* An event bus service can't be obtained before the `start` method of the verticle is called,
+  because the `Vertx` instance won't be initialized before this point. Make sure you always obtain
+  your services when the Vert.x is already initialized
+* Nested interfaces are currently not usable as service interfaces. This limitation will be removed
+  in a future version
+
 ## Using this in your Microservice
 Add the KOBIL Nexus repository to your build script:
 
@@ -153,8 +163,8 @@ Apply the `kapt` plugin:
 
 ```kotlin
 plugins {
-  kotlin("jvm") version "<kotlin version>"
-  kotlin("kapt") version "<kotlin version>"
+  kotlin("jvm") version "1.5.0"
+  kotlin("kapt") version "1.5.0"
 
   // ... other plugins ...
 }
@@ -163,6 +173,6 @@ plugins {
 Then, add the following dependencies:
 
 ```kotlin
-implementation("com.kobil.vertx:ebservice:1.0.1")
-kapt("com.kobil.vertx:ebservice-codegen:1.0.1")
+implementation("com.kobil.vertx:ebservice:1.1.0")
+kapt("com.kobil.vertx:ebservice-codegen:1.1.0")
 ```

@@ -12,7 +12,7 @@ repositories {
 dependencies {
   implementation(kotlin("stdlib-jdk8"))
 
-  implementation("io.vertx:vertx-core:4.0.3")
+  implementation("io.vertx:vertx-core:4.1.1")
   implementation("com.squareup:kotlinpoet:1.8.0")
   implementation("com.squareup:kotlinpoet-metadata:1.8.0")
   implementation(project(":core"))

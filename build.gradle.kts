@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.kobil.vertx"
-version = "1.0.2"
+version = "1.1.0"
 
 val projectGroup = group
 val projectVersion = version

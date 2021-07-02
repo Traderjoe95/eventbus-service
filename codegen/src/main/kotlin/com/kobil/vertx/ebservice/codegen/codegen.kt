@@ -436,7 +436,7 @@ private fun addRequestStyleBind(bind: FunSpec.Builder, function: ServiceFun) {
         |  }
         |}.%M(scope)
       """.trimMargin(),
-    MemberName(VERTX_COROUTINES, "toChannel"),
+    MemberName(VERTX_COROUTINES, "toReceiveChannel"),
     MemberName(KOTLINX_COROUTINES_FLOW, "receiveAsFlow"),
     MemberName(KOTLINX_COROUTINES_FLOW, "onEach"),
     SERVICE_RESPONSE.nestedClass("ServiceResult"),
@@ -456,11 +456,11 @@ private fun addEventStyleBind(bind: FunSpec.Builder, function: ServiceFun) {
         |  try {
         |    impl.${function.name}${implCaller(function)}
         |  } catch (e: Exception) {
-        |    println("WARNING: Exception thrown in event handler")
+        |    println("WARNING: Exception thrown in event handler: " + e)
         |  }
         |}.%M(scope)
       """.trimMargin(),
-    MemberName(VERTX_COROUTINES, "toChannel"),
+    MemberName(VERTX_COROUTINES, "toReceiveChannel"),
     MemberName(KOTLINX_COROUTINES_FLOW, "receiveAsFlow"),
     MemberName(KOTLINX_COROUTINES_FLOW, "onEach"),
     MemberName(KOTLINX_COROUTINES_FLOW, "launchIn")

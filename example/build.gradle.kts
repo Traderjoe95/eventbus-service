@@ -14,9 +14,9 @@ dependencies {
   implementation(project(":core"))
   kapt(project(":codegen"))
 
-  implementation("io.vertx:vertx-core:4.0.3")
-  implementation("io.vertx:vertx-lang-kotlin:4.0.3")
-  implementation("io.vertx:vertx-lang-kotlin-coroutines:4.0.3")
+  implementation("io.vertx:vertx-core:4.1.1")
+  implementation("io.vertx:vertx-lang-kotlin:4.1.1")
+  implementation("io.vertx:vertx-lang-kotlin-coroutines:4.1.1")
 }
 
 val compileKotlin: KotlinCompile by tasks
