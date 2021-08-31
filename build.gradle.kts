@@ -1,11 +1,11 @@
 plugins {
-  kotlin("jvm") version "1.5.0" apply false
-  kotlin("kapt") version "1.5.0" apply false
+  kotlin("jvm") version "1.5.30" apply false
+  kotlin("kapt") version "1.5.30" apply false
   `maven-publish`
 }
 
 group = "com.kobil.vertx"
-version = "1.1.0"
+version = "1.2.0"
 
 val projectGroup = group
 val projectVersion = version

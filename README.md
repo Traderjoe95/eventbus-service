@@ -163,8 +163,8 @@ Apply the `kapt` plugin:
 
 ```kotlin
 plugins {
-  kotlin("jvm") version "1.5.0"
-  kotlin("kapt") version "1.5.0"
+  kotlin("jvm") version "1.5.30"
+  kotlin("kapt") version "1.5.30"
 
   // ... other plugins ...
 }
@@ -173,6 +173,6 @@ plugins {
 Then, add the following dependencies:
 
 ```kotlin
-implementation("com.kobil.vertx:ebservice:1.1.0")
-kapt("com.kobil.vertx:ebservice-codegen:1.1.0")
+implementation("com.kobil.vertx:ebservice:1.2.0")
+kapt("com.kobil.vertx:ebservice-codegen:1.2.0")
 ```

@@ -12,13 +12,13 @@ import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.MemberName.Companion.member
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.WildcardTypeName
-import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import io.vertx.core.Vertx
 import io.vertx.core.eventbus.EventBus
@@ -282,7 +282,15 @@ private fun generateParameterContainer(
           .initializer(parameter.name)
           .build()
       }
-    )
+    ).apply {
+      if (function.typeParameters.isNotEmpty()) {
+        addTypeVariables(function.typeParameters.filter { param ->
+          function.parameters.any {
+            it.type == param
+          }
+        })
+      }
+    }
     .build()
 }
 
@@ -311,6 +319,8 @@ private fun generateStubFun(function: ServiceFun, containerType: String?): FunSp
       }
     )
     .returns(function.returnType)
+
+  if (function.typeParameters.isNotEmpty()) spec.addTypeVariables(function.typeParameters)
 
   if (function.isSuspend) spec.addModifiers(KModifier.SUSPEND)
 
@@ -389,7 +399,7 @@ private fun generateBindFun(service: Service): FunSpec {
     val requestType = requestType(function, stubCompanion)
 
     bind.addStatement(
-      """var ${function.fullName}Consumer = vertx.eventBus().localConsumer<%T>(baseAddress + %S)
+      """var ${function.fullName}Consumer = vertx.eventBus().localConsumer<%L>(baseAddress + %S)
         |consumers.add(${function.fullName}Consumer)
       """.trimMargin(),
       requestType,
@@ -477,14 +487,61 @@ private fun implCaller(function: ServiceFun) =
       }
   }
 
-private fun requestType(function: ServiceFun, stubCompanion: ClassName) =
+private fun requestType(function: ServiceFun, stubCompanion: ClassName): String =
   when (function.parameters.size) {
-    0 -> Unit::class.asTypeName()
+    0 -> "kotlin.Unit"
     1 -> {
       val first = function.parameters.first()
+      val ptype = first.type as? ParameterizedTypeName
 
-      if (first.isVararg) arrayType(first.type, first.isPrimitive)
-      else first.type
+      if (first.isVararg && first.type !is TypeVariableName)
+        "${arrayType(first.type, first.isPrimitive)}"
+      else if (first.isVararg)
+        "kotlin.Array<${(first.type as TypeVariableName).wildcard(function.typeParameters)}>"
+      else if (first.type is ParameterizedTypeName && ptype!!.typeArguments.any { it is TypeVariableName }) {
+        "${ptype.rawType}${ptype.typeArguments.print(function.typeParameters)}"
+      } else "${first.type}"
     }
-    else -> stubCompanion.nestedClass(function.parameterContainer)
+    else -> {
+      val container = stubCompanion.nestedClass(function.parameterContainer)
+      val typeParams = function.typeParameters.filter { param ->
+        function.parameters.any {
+          it.type == param
+        }
+      }
+
+      if (typeParams.isNotEmpty()) "$container${typeParams.wildcards(function.typeParameters)}"
+      else "$container"
+    }
   }
+
+private fun List<TypeName>.print(typeParameters: List<TypeVariableName>): String =
+  joinToString(prefix = "<", separator = ",", postfix = ">") {
+    when (it) {
+      is TypeVariableName -> it.wildcard(typeParameters)
+      is ParameterizedTypeName -> "${it.rawType}${it.typeArguments.print(typeParameters)}"
+      else -> "$it"
+    }
+  }
+
+private fun List<TypeVariableName>.wildcards(typeParameters: List<TypeVariableName>): String =
+  joinToString(prefix = "<", separator = ",", postfix = ">") {
+    it.wildcard(typeParameters)
+  }
+
+private fun TypeVariableName.wildcard(typeParameters: List<TypeVariableName>): String {
+  val realTypeVar = typeParameters.find { it.name == name }!!
+  println("$realTypeVar : ${realTypeVar.bounds}")
+  val bounds = realTypeVar.bounds
+
+  return when (val first = bounds.firstOrNull()) {
+    null -> "Any" + if (isNullable) "?" else ""
+    is TypeVariableName -> typeParameters.find { first.name == it.name }!!.wildcard(typeParameters)
+    is ParameterizedTypeName -> {
+      "${first.rawType}${first.typeArguments.print(typeParameters)}"
+    }
+    else -> {
+      "$first"
+    }
+  }
+}
