@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.1] - 2021-09-01
+### Fixed
+* Properly extract type arguments from all parameters, including lambdas
+* Remove debug `println`s
+
 ## [1.2.0] - 2021-08-31
 ### Added
 * Support for generic service functions

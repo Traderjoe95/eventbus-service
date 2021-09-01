@@ -34,6 +34,11 @@ interface MathService {
     a: A, blockExtSus: suspend String.(A) -> Generic<A, String>
   ): Generic<A, String>
 
+  suspend fun <A, B> suspendLambdaGeneric2(
+    a: String,
+    block: suspend () -> Generic<A, B>
+  ): Generic<A, B>
+
   suspend fun suspendEvent(payload: String)
   fun event(payload: String)
 }
@@ -95,6 +100,11 @@ class DivisionVerticle : CoroutineVerticle() {
           a: A,
           blockExtSus: suspend String.(A) -> Generic<A, String>
         ): Generic<A, String> = "abc".blockExtSus(a)
+
+        override suspend fun <A, B> suspendLambdaGeneric2(
+          a: String,
+          block: suspend () -> Generic<A, B>
+        ): Generic<A, B> = block()
 
         override suspend fun suspendEvent(payload: String) = println("received event: $payload")
 
@@ -159,6 +169,9 @@ class SampleVerticle : CoroutineVerticle() {
 
       val l5 = mathService.suspendLambdaGeneric(123456) { Generic(it, this) }
       println(l5)
+
+      val l6 = mathService.suspendLambdaGeneric2("abc") { Generic(1, 2.5) }
+      println(l6)
     } catch (e: Exception) {
       println("OH NOES, $e")
     }

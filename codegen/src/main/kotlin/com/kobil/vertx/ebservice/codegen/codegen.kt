@@ -286,7 +286,7 @@ private fun generateParameterContainer(
       if (function.typeParameters.isNotEmpty()) {
         addTypeVariables(function.typeParameters.filter { param ->
           function.parameters.any {
-            it.type == param
+            it.typeParameters().contains(param)
           }
         })
       }
@@ -506,7 +506,7 @@ private fun requestType(function: ServiceFun, stubCompanion: ClassName): String 
       val container = stubCompanion.nestedClass(function.parameterContainer)
       val typeParams = function.typeParameters.filter { param ->
         function.parameters.any {
-          it.type == param
+          it.typeParameters().contains(param)
         }
       }
 
@@ -531,7 +531,6 @@ private fun List<TypeVariableName>.wildcards(typeParameters: List<TypeVariableNa
 
 private fun TypeVariableName.wildcard(typeParameters: List<TypeVariableName>): String {
   val realTypeVar = typeParameters.find { it.name == name }!!
-  println("$realTypeVar : ${realTypeVar.bounds}")
   val bounds = realTypeVar.bounds
 
   return when (val first = bounds.firstOrNull()) {

@@ -1,10 +1,13 @@
 package com.kobil.vertx.ebservice.codegen
 
 import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.Dynamic
 import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeVariableName
+import com.squareup.kotlinpoet.WildcardTypeName
 import java.util.Locale
 
 data class Service(val name: ClassName, val functions: Set<ServiceFun>)
@@ -30,6 +33,8 @@ data class ServiceFun(
 abstract class Parameter(val isVararg: Boolean, val isPrimitive: Boolean) {
   abstract val name: String
   abstract val type: TypeName
+
+  fun typeParameters(): Set<TypeVariableName> = type.typeParameters()
 }
 
 class BasicParameter(
@@ -45,3 +50,17 @@ class LambdaParameter(
     receiver, parameters.map { ParameterSpec.Companion.unnamed(it) }, returnType
   ).copy(suspending = isSuspend)
 }
+
+private fun TypeName.typeParameters(): Set<TypeVariableName> =
+  when (this) {
+    is TypeVariableName -> setOf(this)
+    is LambdaTypeName ->
+      (receiver?.typeParameters() ?: setOf()) +
+        returnType.typeParameters() +
+        parameters.flatMap { it.type.typeParameters() }
+    is ParameterizedTypeName -> typeArguments.flatMap { it.typeParameters() }.toSet()
+    is WildcardTypeName ->
+      outTypes.flatMap { it.typeParameters() }.toSet() +
+        inTypes.flatMap { it.typeParameters() }
+    else -> setOf()
+  }
