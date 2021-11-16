@@ -34,7 +34,7 @@ import javax.lang.model.util.ElementFilter
 import javax.tools.Diagnostic
 
 @KotlinPoetMetadataPreview
-@SupportedSourceVersion(SourceVersion.RELEASE_16)
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedOptions("kapt.kotlin.generated")
 @SupportedAnnotationTypes("com.kobil.vertx.ebservice.annotation.EventBusService")
 class ServiceProcessor : AbstractProcessor() {

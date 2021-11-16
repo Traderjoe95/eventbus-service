@@ -14,13 +14,13 @@ dependencies {
   implementation(project(":core"))
   kapt(project(":codegen"))
 
-  implementation("io.vertx:vertx-core:4.1.2")
-  implementation("io.vertx:vertx-lang-kotlin:4.1.2")
-  implementation("io.vertx:vertx-lang-kotlin-coroutines:4.1.2")
+  implementation("io.vertx:vertx-core:4.2.1")
+  implementation("io.vertx:vertx-lang-kotlin:4.2.1")
+  implementation("io.vertx:vertx-lang-kotlin-coroutines:4.2.1")
 }
 
 val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "16"
+compileKotlin.kotlinOptions.jvmTarget = "17"
 
 val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.kotlinOptions.jvmTarget = "16"
+compileTestKotlin.kotlinOptions.jvmTarget = "17"

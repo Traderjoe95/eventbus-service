@@ -11,15 +11,15 @@ repositories {
 
 dependencies {
   implementation(kotlin("stdlib-jdk8"))
-  implementation("io.vertx:vertx-core:4.1.2")
+  implementation("io.vertx:vertx-core:4.2.1")
   api(project(":annotation"))
 }
 
 val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions.jvmTarget = "16"
+compileKotlin.kotlinOptions.jvmTarget = "17"
 
 val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.kotlinOptions.jvmTarget = "16"
+compileTestKotlin.kotlinOptions.jvmTarget = "17"
 
 publishing {
   publications {

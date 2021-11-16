@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.2] - 2021-11-16
+### Changed
+* Updated to Kotlin 1.6.0, Vert.x 4.2.1, Java 17 and Gradle 7.3
+
 ## [1.2.1] - 2021-09-01
 ### Fixed
 * Properly extract type arguments from all parameters, including lambdas
